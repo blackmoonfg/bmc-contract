@@ -1,0 +1,36 @@
+{
+  "name": "bmc-contract",
+  "version": "0.0.1",
+  "description": "## BMC pre-Alpha",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bfg-dev/bmc-contract.git"
+  },
+  "author": "BMC Team",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bfg-dev/bmc-contract/issues"
+  },
+  "homepage": "https://github.com/bfg-dev/bmc-contract#readme",
+  "dependencies": {
+    "bs58": "^4.0.1",
+    "buffer": "^5.0.6",
+    "ethereumjs-testrpc": "3.0.5",
+    "truffle-artifactor": "2.1.5",
+    "truffle": "3.4.9",
+    "q": "^1.5.0",
+    "truffle-hdwallet-provider": "mikefluff/truffle-hdwallet-provider"
+  },
+  "devDependencies": {
+    "@digix/contest": "^0.2.6",
+    "@digix/tempo": "^0.2.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.24.1",
+    "ethereumjs-wallet": "0.6.0",
+    "standard-version": "^4.0.0"
+  }
+}

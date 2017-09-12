@@ -314,6 +314,44 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
         return OK;
     }
 
+    function massTransfer(address[] addresses, uint[] values, bytes32 _symbol) external
+    returns (uint errorCode, uint count)
+    {
+        require(checkIsOnlyOwner(_symbol) == OK);
+        require(addresses.length == values.length);
+        require(_symbol != 0x0);
+
+        // TODO: ahiatsevich checkIsOnlyProxy
+
+        uint senderId = _createHolderId(msg.sender);
+
+        uint transferedCount;
+        for(transferedCount = 0; transferedCount < addresses.length && msg.gas > 110000; transferedCount++) {
+            uint holderId = _createHolderId(addresses[transferedCount]);
+            uint value = values[transferedCount];
+
+            if (senderId == holderId) {
+                _error(BMC_PLATFORM_CANNOT_APPLY_TO_ONESELF, "Cannot send to oneself");
+                return (BMC_PLATFORM_CANNOT_APPLY_TO_ONESELF, transferedCount);
+            }
+
+            if (value == 0) {
+                _error(BMC_PLATFORM_INVALID_VALUE, "Cannot send 0 value");
+                return (BMC_PLATFORM_INVALID_VALUE, transferedCount);
+            }
+
+            if (_balanceOf(senderId, _symbol) < value) {
+                _error(BMC_PLATFORM_INSUFFICIENT_BALANCE, "Insufficient balance");
+                return (BMC_PLATFORM_INSUFFICIENT_BALANCE, transferedCount);
+            }
+
+            _transferDirect(senderId, holderId, value, _symbol);
+            BMCPlatformEmitter(eventsHistory).emitTransfer(msg.sender, addresses[transferedCount], _symbol, value, "");
+        }
+
+        return (OK, transferedCount);
+    }
+
     /**
      * Transfers asset balance between holders wallets.
      *

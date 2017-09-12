@@ -21,9 +21,10 @@
     "buffer": "^5.0.6",
     "ethereumjs-testrpc": "3.0.5",
     "truffle-artifactor": "2.1.5",
-    "truffle": "3.4.9",
+    "truffle": "ahiatsevich/truffle#hotfix/input-params-check",
     "q": "^1.5.0",
-    "truffle-hdwallet-provider": "mikefluff/truffle-hdwallet-provider"
+    "truffle-hdwallet-provider": "mikefluff/truffle-hdwallet-provider",
+    "csv-parse": "^1.2.1"
   },
   "devDependencies": {
     "@digix/contest": "^0.2.6",

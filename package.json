@@ -24,7 +24,8 @@
     "truffle": "ahiatsevich/truffle#hotfix/input-params-check",
     "q": "^1.5.0",
     "truffle-hdwallet-provider": "mikefluff/truffle-hdwallet-provider",
-    "csv-parse": "^1.2.1"
+    "csv-parse": "^1.2.1",
+    "csv-writer": "^0.0.3"
   },
   "devDependencies": {
     "@digix/contest": "^0.2.6",

@@ -45,6 +45,7 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
     uint constant BMC_PLATFORM_ACCESS_DENIED_ONLY_PROXY = BMC_PLATFORM_SCOPE + 15;
     uint constant BMC_PLATFORM_ACCESS_DENIED_ONLY_TRUSTED = BMC_PLATFORM_SCOPE + 16;
     uint constant BMC_PLATFORM_INVALID_INVOCATION = BMC_PLATFORM_SCOPE + 17;
+    uint constant BMC_PLATFORM_HOLDER_EXISTS = BMC_PLATFORM_SCOPE + 18;
 
     // Structure of a particular asset.
     struct Asset {
@@ -325,31 +326,39 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
 
         uint senderId = _createHolderId(msg.sender);
 
-        uint transferedCount;
-        for(transferedCount = 0; transferedCount < addresses.length && msg.gas > 110000; transferedCount++) {
-            uint holderId = _createHolderId(addresses[transferedCount]);
-            uint value = values[transferedCount];
-
-            if (senderId == holderId) {
-                _error(BMC_PLATFORM_CANNOT_APPLY_TO_ONESELF, "Cannot send to oneself");
-                return (BMC_PLATFORM_CANNOT_APPLY_TO_ONESELF, transferedCount);
-            }
+        uint success = 0;
+        for(uint idx = 0; idx < addresses.length && msg.gas > 110000; idx++) {
+            uint value = values[idx];
 
             if (value == 0) {
                 _error(BMC_PLATFORM_INVALID_VALUE, "Cannot send 0 value");
-                return (BMC_PLATFORM_INVALID_VALUE, transferedCount);
+                continue;
+            }
+
+            if (getHolderId(addresses[idx]) > 0) {
+                _error(BMC_PLATFORM_HOLDER_EXISTS, "Already transfered");
+                continue;
             }
 
             if (_balanceOf(senderId, _symbol) < value) {
                 _error(BMC_PLATFORM_INSUFFICIENT_BALANCE, "Insufficient balance");
-                return (BMC_PLATFORM_INSUFFICIENT_BALANCE, transferedCount);
+                continue;
             }
 
+            if (msg.sender == addresses[idx]) {
+                _error(BMC_PLATFORM_CANNOT_APPLY_TO_ONESELF, "Cannot send to oneself");
+                continue;
+            }
+
+            uint holderId = _createHolderId(addresses[idx]);
+
             _transferDirect(senderId, holderId, value, _symbol);
-            BMCPlatformEmitter(eventsHistory).emitTransfer(msg.sender, addresses[transferedCount], _symbol, value, "");
+            BMCPlatformEmitter(eventsHistory).emitTransfer(msg.sender, addresses[idx], _symbol, value, "");
+            
+            success++;
         }
 
-        return (OK, transferedCount);
+        return (OK, success);
     }
 
     /**

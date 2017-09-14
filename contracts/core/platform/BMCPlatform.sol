@@ -301,7 +301,7 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
      *
      * @return success.
      */
-    function setProxy(address _address, bytes32 _symbol) onlyContractOwner() returns(uint errorCode) {
+    function setProxy(address _address, bytes32 _symbol) returns(uint errorCode) {
         errorCode = checkOnlyContractOwner();
         if (errorCode != OK) {
             return errorCode;

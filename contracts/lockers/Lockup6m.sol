@@ -109,11 +109,11 @@ contract Lockup6m is Object {
         return OK;
     }
 
-    function getLockedFunds(uint id) constant returns (uint) {
+    function getLockedFunds() constant returns (uint) {
         return lock.balance;
     }
     
-    function getLockedFundsReleaseTime(uint id) constant returns (uint) {
+    function getLockedFundsReleaseTime() constant returns (uint) {
 	    return lock.releaseTime;
     }
 

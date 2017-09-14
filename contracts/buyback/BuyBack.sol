@@ -126,6 +126,7 @@ contract BuyBack is Object {
         asset = _asset;
         delayedPayments = _delayedPayments;
         isActive = true;
+        return OK;
     }
 
     function setActive(bool _active) onlyContractOwner returns (uint) {
@@ -208,7 +209,7 @@ contract BuyBack is Object {
             throw;
         }
         if (!delayedPayments.allowedSpenders(this)) {
-            return _error(ERROR_EXCHANGE_DELAYEDPAYMENTS_ACCESS);
+            throw;
         }
         delayedPayments.authorizePayment(msg.sender,total,2 hours); 
         Sell(msg.sender, _amount, total);

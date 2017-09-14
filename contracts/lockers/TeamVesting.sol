@@ -22,7 +22,7 @@ contract TeamVesting is Object {
     // custom data structure to hold locked funds and time
     struct accountData {
         uint balance;
-        uint releaseTime;
+        uint initDate;
         uint lastSpending;
     }
 
@@ -89,7 +89,7 @@ contract TeamVesting is Object {
         if (amount == 0) {
             return TIME_LOCK_BALANCE_ERROR;
         }
-        lock = accountData(amount,now + 2 years,0);
+        lock = accountData(amount,now,0);
         return OK;
     }
     
@@ -106,32 +106,37 @@ contract TeamVesting is Object {
     }
 
     // used to calculate amount we are able to spend according to current timestamp 
-    function getVesting() constant returns (uint) {
+    function getVesting() returns (uint) {
         uint amount;
-        for(uint i = 24; i >= 6; i-3) {
-           uint date = 1 years * i;
-           if(lock.releaseTime < (now + date)) {
+        for(uint i = 24; i >= 6;) {
+           uint date = 30 days * i;
+           if(now > (lock.initDate + date)) {
               if(lock.lastSpending == i) {
                  break;
               }
-		      else
+		      if(lock.lastSpending == 0)
               {
-                 amount = lock.balance * 125 * i / 1000;
+                 amount = (lock.balance * 125 * (i/3)) / 1000;
+                 lock.lastSpending = i;
+                 break;
+              }
+              else {
+                 amount = ((lock.balance * 125 * (i/3)) / 1000) - ((lock.balance * 125 * (lock.lastSpending/3)) / 1000);
                  lock.lastSpending = i;
                  break;
               }
           }
+            i-=3;
         }
         return amount;   
     }
 
-    // some helper functions for demo purposes (not required)
     function getLockedFunds() constant returns (uint) {
-        return lock.balance;
+        return ERC20Interface(asset).balanceOf(this);
     }
     
-    function getLockedFundsReleaseTime() constant returns (uint) {
-	    return lock.releaseTime;
+    function getLockedFundsLastSpending() constant returns (uint) {
+	    return lock.lastSpending;
     }
 
 }

@@ -181,20 +181,20 @@ contract DelayedPayments is Object {
     function collectAuthorizedPayment(uint _idPayment) {
 
         // Check that the `_idPayment` has been added to the payments struct
-        if (_idPayment >= authorizedPayments.length) throw;
+        if (_idPayment >= authorizedPayments.length) return;
 
         Payment p = authorizedPayments[_idPayment];
 
         // Checking for reasons not to execute the payment
-        if (msg.sender != p.recipient) throw;
-        if (now < p.earliestPayTime) throw;
-        if (p.canceled) throw;
-        if (p.paid) throw;
-        if (this.balance < p.amount) throw;
+        if (msg.sender != p.recipient) return;
+        if (now < p.earliestPayTime) return;
+        if (p.canceled) return;
+        if (p.paid) return;
+        if (this.balance < p.amount) return;
 
         p.paid = true; // Set the payment to being paid
         if (!p.recipient.send(p.amount)) {  // Make the payment
-            throw;
+            return;
         }
         PaymentExecuted(_idPayment, p.recipient, p.amount);
      }

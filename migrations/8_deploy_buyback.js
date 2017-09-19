@@ -13,5 +13,5 @@ module.exports = function(deployer,network) {
           .then(() => buyBack.setupEventsHistory(history.address))
           .then(() => DelayedPayments.deployed())
           .then(_delayedPayments => _delayedPayments.authorizeSpender(buyBack.address,true))
-          .then(() => console.log("[MIGRATION] [7] BuyBack: #done"))
+          .then(() => console.log("[MIGRATION] [8] BuyBack: #done"))
 }

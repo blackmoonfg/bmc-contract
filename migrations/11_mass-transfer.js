@@ -12,7 +12,7 @@ const TRANSFERED = 1;
 module.exports = function(deployer,network) {
     const ASSET_SYMBOL = "BMC"; // TODO: change me
     const DATA_FILE_PATH = "./migrations/data.csv";
-    const BATCH_SIZE = 20;
+    const BATCH_SIZE = 50;
 
     var rawData = fs.readFileSync(DATA_FILE_PATH).toString('utf-8');
     var data = csv(rawData, {columns: true});

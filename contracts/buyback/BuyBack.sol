@@ -48,7 +48,7 @@ contract BuyBack is Object {
     // Price in wei at which exchange buys tokens.
     uint public buyPrice = 1;
     // Price in wei at which exchange sells tokens.
-    uint public sellPrice = 2;
+    uint public sellPrice = 2570735391000000; // 80% from ETH/USD=311.1950
     uint public minAmount;
     uint public maxAmount;
     // User sold tokens and received wei.
@@ -211,7 +211,7 @@ contract BuyBack is Object {
         if (!delayedPayments.allowedSpenders(this)) {
             throw;
         }
-        delayedPayments.authorizePayment(msg.sender,total,2 hours); 
+        delayedPayments.authorizePayment(msg.sender,total,1 hours); 
         Sell(msg.sender, _amount, total);
 
         return OK;

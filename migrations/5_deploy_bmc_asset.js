@@ -4,19 +4,20 @@ const BMC = artifacts.require("./BMC.sol");
 
 module.exports = function(deployer,network) {
     const BMC_SYMBOL = 'BMC';
-    const BMC_NAME = 'Black Moon Crypto Token';
-    const BMC_DESCRIPTION = 'blackmooncrypto.com assets';
+    const BMC_NAME = 'Blackmoon Crypto Token';
+    const BMC_DESCRIPTION = 'BMC blackmooncrypto.com asset';
 
     const BASE_UNIT = 8;
     const IS_REISSUABLE = true;
     const IS_NOT_REISSUABLE = false;
 
-    const VALUE = 10000; //should be changed to final ICO value before migration to mainnet
+    const VALUE = 6000000000000000; // 30M * 2 * 10^8
 
-    const ICO_USD = 10; //should be changed to final ICO value before migration to mainnet
-    const ICO_ETH = 10; //should be changed to final ICO value before migration to mainnet
-    const ICO_BTC = 10; //should be changed to final ICO value before migration to mainnet
-    const ICO_LTC = 10; //should be changed to final ICO value before migration to mainnet
+    // Final ICO result
+    const ICO_USD = 30000000;
+    const ICO_ETH = 73175;
+    const ICO_BTC = 1142;
+    const ICO_LTC = 32866;
 
     deployer
       .then(() => BMCPlatform.deployed())
@@ -24,11 +25,13 @@ module.exports = function(deployer,network) {
       .then(() => platform.issueAsset(BMC_SYMBOL, VALUE, BMC_NAME, BMC_DESCRIPTION, BASE_UNIT, IS_NOT_REISSUABLE))
       .then(() => deployer.deploy(BMCAssetProxy))
       .then(() => BMCAssetProxy.deployed())
+      .then(_proxy => platform.setProxy(_proxy.address,BMC_SYMBOL))
+      .then(() => BMCAssetProxy.deployed())
       .then(_proxy => _proxy.init(BMCPlatform.address, BMC_SYMBOL, BMC_NAME))
       .then(() => deployer.deploy(BMC))
       .then(() => BMC.deployed())
       .then(_asset => _asset.initBMC(BMCAssetProxy.address,ICO_USD,ICO_ETH,ICO_BTC,ICO_LTC))
       .then(() => BMCAssetProxy.deployed())
       .then(_proxy => _proxy.proposeUpgrade(BMC.address))
-      .then(() => console.log("[MIGRATION] [4] BMC ASSET: #done"))
+      .then(() => console.log("[MIGRATION] [5] BMC ASSET: #done"))
 }

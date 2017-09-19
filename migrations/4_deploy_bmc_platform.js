@@ -9,5 +9,5 @@ module.exports = function(deployer,network) {
           .then(_platform => platform = _platform)
           .then(() => history.authorize(platform.address))
           .then(() => platform.setupEventsHistory(history.address))
-          .then(() => console.log("[MIGRATION] [3] BMCPlatform: #done"))
+          .then(() => console.log("[MIGRATION] [4] BMCPlatform: #done"))
 }

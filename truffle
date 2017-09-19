@@ -1,0 +1,8 @@
+#!/bin/bash
+
+##
+## Due to broken array args support we need this tool to run properl local Truffle
+##
+
+cd `dirname $0`
+node node_modules/truffle/build/cli.bundled.js $@

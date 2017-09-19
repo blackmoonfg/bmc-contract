@@ -2,6 +2,7 @@ pragma solidity ^0.4.11;
 
 import "../common/Object.sol";
 import "./BMCPlatformEmitter.sol";
+import "../lib/SafeMath.sol";
 
 contract Proxy {
     function emitTransfer(address _from, address _to, uint _value);
@@ -25,6 +26,8 @@ contract Proxy {
  * didn't happen yet.
  */
 contract BMCPlatform is Object, BMCPlatformEmitter {
+
+    using SafeMath for uint;
 
     uint constant BMC_PLATFORM_SCOPE = 15000;
     uint constant BMC_PLATFORM_PROXY_ALREADY_EXISTS = BMC_PLATFORM_SCOPE + 0;
@@ -370,8 +373,8 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
      * @param _symbol asset symbol.
      */
     function _transferDirect(uint _fromId, uint _toId, uint _value, bytes32 _symbol) internal {
-        assets[_symbol].wallets[_fromId].balance -= _value;
-        assets[_symbol].wallets[_toId].balance += _value;
+        assets[_symbol].wallets[_fromId].balance = assets[_symbol].wallets[_fromId].balance.sub(_value);
+        assets[_symbol].wallets[_toId].balance = assets[_symbol].wallets[_toId].balance.add(_value);
     }
 
     /**
@@ -409,7 +412,8 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
         _transferDirect(_fromId, _toId, _value, _symbol);
         // Adjust allowance.
         if (_fromId != _senderId) {
-            assets[_symbol].wallets[_fromId].allowance[_senderId] -= _value;
+            uint senderAllowance = assets[_symbol].wallets[_fromId].allowance[_senderId];
+            assets[_symbol].wallets[_fromId].allowance[_senderId] = senderAllowance.sub(_value);
         }
         // Internal Out Of Gas/Throw: revert this transaction too;
         // Call Stack Depth Limit reached: n/a after HF 4;
@@ -555,8 +559,8 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
             return _error(BMC_PLATFORM_SUPPLY_OVERFLOW, "Total supply overflow");
         }
         uint holderId = getHolderId(msg.sender);
-        asset.wallets[holderId].balance += _value;
-        asset.totalSupply += _value;
+        asset.wallets[holderId].balance = asset.wallets[holderId].balance.add(_value);
+        asset.totalSupply = asset.totalSupply.add(_value);
         // Internal Out Of Gas/Throw: revert this transaction too;
         // Call Stack Depth Limit reached: n/a after HF 4;
         // Recursive Call: safe, all changes already made.
@@ -584,8 +588,8 @@ contract BMCPlatform is Object, BMCPlatformEmitter {
         if (asset.wallets[holderId].balance < _value) {
             return _error(BMC_PLATFORM_NOT_ENOUGH_TOKENS, "Not enough tokens to revoke");
         }
-        asset.wallets[holderId].balance -= _value;
-        asset.totalSupply -= _value;
+        asset.wallets[holderId].balance = asset.wallets[holderId].balance.sub(_value);
+        asset.totalSupply = asset.totalSupply.sub(_value);
         // Internal Out Of Gas/Throw: revert this transaction too;
         // Call Stack Depth Limit reached: n/a after HF 4;
         // Recursive Call: safe, all changes already made.

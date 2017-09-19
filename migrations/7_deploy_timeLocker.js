@@ -10,5 +10,5 @@ module.exports = function(deployer,network) {
           .then(_timeLock => timeLock = _timeLock)
           .then(() => history.authorize(timeLock.address))
           .then(() => timeLock.setupEventsHistory(history.address))
-          .then(() => console.log("[MIGRATION] [6] Time Lock: #done"))
+          .then(() => console.log("[MIGRATION] [7] Time Lock: #done"))
 }

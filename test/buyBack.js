@@ -1,11 +1,13 @@
-var BuyBack = artifacts.require("./BuyBack.sol");
-var DelayedPayments = artifacts.require("./DelayedPayments.sol");
-var FakeCoin = artifacts.require("./FakeCoin.sol");
-var FakeCoin2 = artifacts.require("./FakeCoin2.sol");
-var MultiEventsHistory = artifacts.require("./MultiEventsHistory.sol");
-var Reverter = require('./helpers/reverter');
-var bytes32 = require('./helpers/bytes32');
-var eventsHelper = require('./helpers/eventsHelper');
+const BuyBack = artifacts.require("./BuyBack.sol");
+const DelayedPayments = artifacts.require("./DelayedPayments.sol");
+const FakeCoin = artifacts.require("./FakeCoin.sol");
+const FakeCoin2 = artifacts.require("./FakeCoin2.sol");
+const MultiEventsHistory = artifacts.require("./MultiEventsHistory.sol");
+const Reverter = require('./helpers/reverter');
+const bytes32 = require('./helpers/bytes32');
+const eventsHelper = require('./helpers/eventsHelper');
+const Clock = artifacts.require('./Clock.sol')
+const TimeMachine = require('./helpers/timemachine');
 const ErrorsEnum = require("../common/errors");
 
 contract('BuyBack', (accounts) => {
@@ -17,7 +19,7 @@ contract('BuyBack', (accounts) => {
   let delayedPayments;
   let delegate = '0x0';
   const BUY_PRICE = 1;
-  const SELL_PRICE = 2;
+  const SELL_PRICE = 2570735391000000;
   const BALANCE = 1000;
   const BALANCE_ETH = 100;
 
@@ -29,12 +31,15 @@ contract('BuyBack', (accounts) => {
   let assertEthBalance = (address, expectedBalance) => {
     return Promise.resolve()
       .then(() => web3.eth.getBalance(address))
-      .then((balance) => assert.equal(balance.valueOf(), expectedBalance));
+      .then((balance) => assert.equal(Math.round(balance.valueOf()/100000), Math.round(expectedBalance/100000)));
   };
 
   let getTransactionCost = (hash) => {
+   const block = web3.eth.getBlock(`latest`);
+   const gasPrice = web3.eth.gasPrice.c[0];
+   console.log(gasPrice);
    return Promise.resolve().then(() =>
-      hash.receipt.gasUsed);
+      hash.receipt.gasUsed * gasPrice);
   };
 
   before('Set Coin contract address', (done) => {
@@ -144,19 +149,42 @@ contract('BuyBack', (accounts) => {
   it('should be possible to sell tokens', () => {
     let sellAmount = 50;
     let balance;
+    let currentTime;
+    let timeMachine = new TimeMachine(web3);
     return exchange.init(coin.address, delayedPayments.address)
       .then(() => delayedPayments.authorizeSpender(exchange.address,true))
       .then(() => web3.eth.getBalance(accounts[0]))
-      .then((result) => balance = result)
+      .then((result) => {balance = result; console.log(balance)})
       .then(() => exchange.sell.call(sellAmount, BUY_PRICE))
       .then((result) => assert.equal(result,ErrorsEnum.OK))
       .then(() => exchange.sell(sellAmount, BUY_PRICE))
-      //.then(getTransactionCost)
-      //.then((txCost) => assertEthBalance(accounts[0], balance.sub(txCost).add(sellAmount).valueOf()))
+      .then(getTransactionCost)
+      .then((txCost) => {balance = balance.valueOf()-txCost*100000000000+sellAmount; console.log(txCost); assertEthBalance(accounts[0], balance)})
       .then(() => assertEthBalance(exchange.address, BALANCE_ETH - sellAmount))
       .then(() => assertBalance(accounts[0], BALANCE - sellAmount))
-      .then(() => assertBalance(exchange.address, BALANCE + sellAmount));
-  });
+      .then(() => assertBalance(exchange.address, BALANCE + sellAmount))
+      .then(() => Clock.deployed())
+      .then(_clock => clock = _clock)
+      .then(() => delayedPayments.collectAuthorizedPayment(0))
+      .then(getTransactionCost)
+      .then((txCost) => {balance = balance.valueOf()-txCost*100000000000; console.log(txCost); assertEthBalance(accounts[0], balance)})
+      .then(() => clock.time.call())
+      .then(_time => currentTime = _time)
+      .then(() => console.log("Testrpc current date:", secondsToDate(currentTime)))
+      .then(() => {
+                var currentDate = secondsToDate(currentTime);
+                currentDate.setHours(currentDate.getHours() + 5);
+                return timeMachine.jump(currentDate.getTime() / 1000 - currentTime);
+      })
+      .then(() => clock.time.call())
+      .then(_time => currentTime = _time)
+      .then(() => console.log("Testrpc current date:", secondsToDate(currentTime)))
+      .then(() => delayedPayments.collectAuthorizedPayment(0))
+      .then(getTransactionCost)
+      .then(() => web3.eth.getBalance(accounts[0]))
+      .then((result) => {balance = result; console.log(balance)})
+      .then((txCost) => {balance = balance.valueOf()-txCost*100000000000; assertEthBalance(accounts[0], balance)})
+    });
 
   it('should not be possible to withdraw tokens by non-owner', () => {
     return exchange.init(coin.address, delayedPayments.address)
@@ -253,4 +281,9 @@ contract('BuyBack', (accounts) => {
       .then(() => assertBalance(exchange.address, BALANCE))
       .then(() => assertEthBalance(exchange.address, BALANCE_ETH));
   });
+
+  let secondsToDate = (seconds) => {
+     var t = new Date(1970, 0, 1); t.setSeconds(seconds);
+     return t;
+  }
 });

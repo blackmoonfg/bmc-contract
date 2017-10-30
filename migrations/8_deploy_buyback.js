@@ -4,7 +4,8 @@ const MultiEventsHistory = artifacts.require("./MultiEventsHistory.sol");
 const DelayedPayments = artifacts.require("./DelayedPayments.sol");
 
 module.exports = function(deployer,network) {
-      deployer.deploy(BuyBack,DelayedPayments.address)
+      deployer.deploy(BuyBack)
+          .then((instance) => instance.init(BMCAssetProxy.address,DelayedPayments.address))
           .then(() => MultiEventsHistory.deployed())
           .then(_history => history = _history )
           .then(() => BuyBack.deployed())

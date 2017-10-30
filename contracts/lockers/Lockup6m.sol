@@ -18,7 +18,7 @@ contract Lockup6m is Object {
     uint constant TIME_LOCK_BALANCE_ERROR = TIME_LOCK_SCOPE + 12;
     uint constant TIME_LOCK_TIMESTAMP_ERROR = TIME_LOCK_SCOPE + 13;
     uint constant TIME_LOCK_INVALID_INVOCATION = TIME_LOCK_SCOPE + 17;
-    
+
 
     // custom data structure to hold locked funds and time
     struct accountData {
@@ -89,7 +89,8 @@ contract Lockup6m is Object {
         if (amount == 0) {
             return TIME_LOCK_BALANCE_ERROR;
         }
-        lock = accountData(amount,now + 180 days);
+        //1523624400 => 2018-04-13 13:00:00
+        lock = accountData(amount, 1523624400);
         return OK;
     }
     

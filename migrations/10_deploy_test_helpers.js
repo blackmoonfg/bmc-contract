@@ -1,20 +1,30 @@
-var FakeCoin = artifacts.require("./FakeCoin.sol");
-var FakeCoin2 = artifacts.require("./FakeCoin2.sol");
-var FakeCoin3 = artifacts.require("./FakeCoin3.sol");
-var Stub = artifacts.require("./helpers/Stub.sol");
-var Clock = artifacts.require("./Clock.sol");
-var BMCPlatformTestable = artifacts.require("./BMCPlatformTestable.sol");
-//var KrakenPriceTicker = artifacts.require("./KrakenPriceTicker.sol");
+const FakeCoin = artifacts.require("./FakeCoin.sol")
+const FakeCoin2 = artifacts.require("./FakeCoin2.sol")
+const FakeCoin3 = artifacts.require("./FakeCoin3.sol")
+const Stub = artifacts.require("./helpers/Stub.sol")
+const Clock = artifacts.require("./Clock.sol")
+const BMCPlatformTestable = artifacts.require("./BMCPlatformTestable.sol")
+const ATxPlatformServiceAllowanceTestable = artifacts.require("./ATxPlatformServiceAllowanceTestable.sol")
+const TokenSender = artifacts.require("./TokenSender.sol")
+//const KrakenPriceTicker = artifacts.require("./KrakenPriceTicker.sol");
 
-module.exports = function(deployer,network) {
-  if(network === 'development' || network === 'test') {
-      deployer.deploy(Stub)
-        .then(() => deployer.deploy(BMCPlatformTestable))
-        .then(() => deployer.deploy(FakeCoin))
-        .then(() => deployer.deploy(FakeCoin2))
-        .then(() => deployer.deploy(FakeCoin3))
-        .then(() => deployer.deploy(Clock))
-//        .then(() => deployer.deploy(KrakenPriceTicker, true))
-        .then(() => console.log("[MIGRATION] [10] Deploy Test contracts: #done"))
-    }
+module.exports = function (deployer, network) {
+	deployer.then(async () => {
+
+		if (network !== 'development' && network !== 'test') {
+			return
+		}
+
+		await deployer.deploy(Stub)
+		await deployer.deploy(BMCPlatformTestable)
+		await deployer.deploy(FakeCoin)
+		await deployer.deploy(FakeCoin2)
+		await deployer.deploy(FakeCoin3)
+		await deployer.deploy(Clock)
+		await deployer.deploy(TokenSender)
+		await deployer.deploy(ATxPlatformServiceAllowanceTestable)
+		//        await deployer.deploy(KrakenPriceTicker, true)
+
+		console.log("[MIGRATION] [10] Deploy Test contracts: #done")
+	})
 }

@@ -81,7 +81,7 @@ contract Lockup6m is Object {
         uint amount = ERC20Interface(asset).balanceOf(this);
         if(lock.balance != 0) {
             if(lock.balance != amount) {
-                lock.balance == amount;
+                lock.balance = amount;
                 return OK;
             }
             return TIME_LOCK_INVALID_INVOCATION;
@@ -93,7 +93,7 @@ contract Lockup6m is Object {
         lock = accountData(amount, 1523624400);
         return OK;
     }
-    
+
     function payOut(address _getter) onlyContractOwner returns(uint errorCode) {
         // check if user has funds due for pay out because lock time is over
         uint amount = lock.balance;

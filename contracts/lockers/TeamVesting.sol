@@ -81,7 +81,7 @@ contract TeamVesting is Object {
         uint amount = ERC20Interface(asset).balanceOf(this); 
         if(lock.balance != 0) {
             if(lock.balance != amount) {
-				lock.balance == amount;
+				lock.balance = amount;
 				return OK;
             }
             return TIME_LOCK_INVALID_INVOCATION;
